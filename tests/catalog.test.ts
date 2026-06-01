@@ -1,20 +1,40 @@
-import { describe, test, expect } from 'vitest'
-import { parseCatalog, CatalogSchema } from '../src/index.js'
+import { describe, test, expect, expectTypeOf } from 'vitest'
+import { parseCatalog, CatalogSchema, type Catalog } from '../src/index.js'
+import { validators } from './helpers/ajv.js'
 import catalog from './fixtures/catalog.json'
 
-describe('CatalogSchema', () => {
-  test('example catalog passes', () => {
-    expect(() => parseCatalog(catalog)).not.toThrow()
+describe('CatalogSchema — valid fixtures', () => {
+  test('catalog: Zod and JSON Schema both pass', () => {
+    const zodResult = CatalogSchema.safeParse(catalog)
+    const ajvValid = validators.catalog(catalog)
+
+    if (!zodResult.success) console.error('Zod errors:', zodResult.error.issues)
+    if (!ajvValid) console.error('Ajv errors:', validators.catalog.errors)
+
+    expect(zodResult.success).toBe(true)
+    expect(ajvValid).toBe(true)
+  })
+})
+
+describe('CatalogSchema — invalid inputs', () => {
+  test('missing stac_version: Zod and JSON Schema both reject', () => {
+    const { stac_version: _v, ...bad } = catalog as Record<string, unknown>
+    expect(CatalogSchema.safeParse(bad).success).toBe(false)
+    expect(validators.catalog(bad)).toBe(false)
   })
 
-  test('safeParse returns success for valid catalog', () => {
-    const result = CatalogSchema.safeParse(catalog)
-    expect(result.success).toBe(true)
+  test('missing description: Zod and JSON Schema both reject', () => {
+    const { description: _d, ...bad } = catalog as Record<string, unknown>
+    expect(CatalogSchema.safeParse(bad).success).toBe(false)
+    expect(validators.catalog(bad)).toBe(false)
   })
+})
 
-  test('safeParse returns failure when stac_version is missing', () => {
-    const { stac_version: _v, ...rest } = catalog as Record<string, unknown>
-    const result = CatalogSchema.safeParse(rest)
-    expect(result.success).toBe(false)
+describe('CatalogSchema — types', () => {
+  test('parseCatalog returns typed Catalog', () => {
+    const cat = parseCatalog(catalog)
+    expectTypeOf(cat).toMatchTypeOf<Catalog>()
+    expect(cat.type).toBe('Catalog')
+    expect(cat.stac_version).toBe('1.0.0')
   })
 })
