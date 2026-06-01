@@ -15,7 +15,6 @@
   ],
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts",
-    "update-schemas": "tsx scripts/update-schemas.ts",
     "test": "vitest run",
     "prepublishOnly": "npm run build"
   },

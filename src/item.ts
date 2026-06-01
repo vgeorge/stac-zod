@@ -13,7 +13,7 @@ const stacExtensionsSchema = z
   .optional()
 
 // C2: STAC bbox is either 4 (2D) or 6 (3D with altitude) numbers.
-const BboxSchema = z.union([
+export const BboxSchema = z.union([
   z.tuple([z.number(), z.number(), z.number(), z.number()]),
   z.tuple([z.number(), z.number(), z.number(), z.number(), z.number(), z.number()]),
 ])

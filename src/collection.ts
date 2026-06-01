@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { BboxSchema } from './item.js'
 import { LinkSchema } from './link.js'
 import { AssetSchema } from './asset.js'
 import { ProviderSchema } from './provider.js'
@@ -11,17 +12,20 @@ const stacExtensionsSchema = z
   .optional()
 
 // C3: outer bbox array requires at least one entry per STAC spec (minItems: 1).
+// Each inner bbox must be 4 (2D) or 6 (3D) numbers, same constraint as Item bbox.
 export const SpatialExtentSchema = z.object({
-  bbox: z.array(z.array(z.number()).min(4)).min(1),
+  bbox: z.array(BboxSchema).min(1),
 })
 
 export const TemporalExtentSchema = z.object({
-  interval: z.array(
-    z.tuple([
-      z.string().datetime({ offset: true }).nullable(),
-      z.string().datetime({ offset: true }).nullable(),
-    ]),
-  ),
+  interval: z
+    .array(
+      z.tuple([
+        z.string().datetime({ offset: true }).nullable(),
+        z.string().datetime({ offset: true }).nullable(),
+      ]),
+    )
+    .min(1),
 })
 
 export const ExtentSchema = z.object({

@@ -1,5 +1,5 @@
 // Item
-export { ItemSchema, ItemPropertiesSchema, parseItem } from './item.js'
+export { ItemSchema, ItemPropertiesSchema, BboxSchema, parseItem } from './item.js'
 export type { Item, ItemProperties } from './item.js'
 
 // Collection
