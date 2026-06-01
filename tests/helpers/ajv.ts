@@ -14,21 +14,23 @@ ajv.addFormat('iri-reference', true)
 
 const schemaRoot = resolve(__dirname, '../json-schemas')
 
-function stripIds(schema: unknown, seen = new WeakSet()): unknown {
-  if (Array.isArray(schema)) return schema.map((v) => stripIds(v, seen))
+// C7: Use bundle() instead of dereference() — bundle() inlines all external $refs as
+// internal JSON pointer definitions without creating circular JS object references.
+// dereference() created circular refs that caused stripIds() to return {} and silently
+// drop descendant constraints from the Ajv oracle.
+function stripIds(schema: unknown): unknown {
+  if (Array.isArray(schema)) return schema.map(stripIds)
   if (schema && typeof schema === 'object') {
-    if (seen.has(schema as object)) return {}
-    seen.add(schema as object)
     const { $id: _, ...rest } = schema as Record<string, unknown>
-    return Object.fromEntries(Object.entries(rest).map(([k, v]) => [k, stripIds(v, seen)]))
+    return Object.fromEntries(Object.entries(rest).map(([k, v]) => [k, stripIds(v)]))
   }
   return schema
 }
 
 async function loadValidator(schemaPath: string) {
   const raw = JSON.parse(readFileSync(schemaPath, 'utf-8'))
-  const derefed = await $RefParser.dereference(schemaPath, raw, {})
-  return ajv.compile(stripIds(derefed) as object)
+  const bundled = await $RefParser.bundle(schemaPath, raw, {})
+  return ajv.compile(stripIds(bundled) as object)
 }
 
 export const validators = {

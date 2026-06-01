@@ -45,7 +45,6 @@ export type MultiPoint = z.infer<typeof MultiPointSchema>
 export type MultiLineString = z.infer<typeof MultiLineStringSchema>
 export type MultiPolygon = z.infer<typeof MultiPolygonSchema>
 
-// Forward reference required for GeometryCollection (self-referential)
 const BaseGeometrySchema = z.discriminatedUnion('type', [
   PointSchema,
   LineStringSchema,
@@ -55,13 +54,25 @@ const BaseGeometrySchema = z.discriminatedUnion('type', [
   MultiPolygonSchema,
 ])
 
-export const GeometryCollectionSchema = z.object({
+export type BaseGeometry = z.infer<typeof BaseGeometrySchema>
+
+// GeometryCollection and Geometry are mutually recursive — use z.lazy()
+export type GeometryCollection = {
+  type: 'GeometryCollection'
+  geometries: Geometry[]
+  bbox?: number[]
+}
+export type Geometry = BaseGeometry | GeometryCollection
+
+// GeometryCollectionSchema is declared before GeometrySchema so the z.lazy()
+// reference to GeometrySchema is resolved at validation time, not definition time.
+export const GeometryCollectionSchema: z.ZodType<GeometryCollection> = z.object({
   type: z.literal('GeometryCollection'),
-  geometries: z.array(BaseGeometrySchema),
+  geometries: z.lazy(() => z.array(GeometrySchema)),
   bbox: z.array(z.number()).min(4).optional(),
 })
 
-export const GeometrySchema = z.union([BaseGeometrySchema, GeometryCollectionSchema])
-
-export type Geometry = z.infer<typeof GeometrySchema>
-export type GeometryCollection = z.infer<typeof GeometryCollectionSchema>
+export const GeometrySchema: z.ZodType<Geometry> = z.union([
+  BaseGeometrySchema,
+  GeometryCollectionSchema,
+])
