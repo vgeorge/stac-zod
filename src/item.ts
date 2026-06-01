@@ -1,22 +1,9 @@
 import { z } from 'zod'
-import { GeometrySchema } from './geometry.js'
+import { BboxSchema, GeometrySchema } from './geometry.js'
 import { LinkSchema } from './link.js'
 import { AssetSchema } from './asset.js'
-
-// C1: stac_extensions are IRIs (broader than URLs) — Zod has no IRI validator,
-// so we accept any string and let the JSON Schema oracle catch spec violations.
-const stacExtensionsSchema = z
-  .array(z.string())
-  .refine((arr) => new Set(arr).size === arr.length, {
-    message: 'stac_extensions must be unique',
-  })
-  .optional()
-
-// C2: STAC bbox is either 4 (2D) or 6 (3D with altitude) numbers.
-export const BboxSchema = z.union([
-  z.tuple([z.number(), z.number(), z.number(), z.number()]),
-  z.tuple([z.number(), z.number(), z.number(), z.number(), z.number(), z.number()]),
-])
+import { StacExtensionsSchema } from './shared.js'
+import { StacValidationError } from './errors.js'
 
 export const ItemPropertiesSchema = z
   .object({
@@ -52,7 +39,7 @@ export const ItemSchema = z
   .object({
     type: z.literal('Feature'),
     stac_version: z.literal('1.0.0'),
-    stac_extensions: stacExtensionsSchema,
+    stac_extensions: StacExtensionsSchema,
     id: z.string().min(1),
     geometry: GeometrySchema.nullable(),
     bbox: BboxSchema.optional(),
@@ -83,5 +70,9 @@ export type ItemProperties = z.infer<typeof ItemPropertiesSchema>
 export type Item = z.infer<typeof ItemSchema>
 
 export function parseItem(data: unknown): Item {
-  return ItemSchema.parse(data)
+  const result = ItemSchema.safeParse(data)
+  if (!result.success) {
+    throw new StacValidationError('Item', result.error)
+  }
+  return result.data
 }

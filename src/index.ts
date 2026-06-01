@@ -1,5 +1,5 @@
 // Item
-export { ItemSchema, ItemPropertiesSchema, BboxSchema, parseItem } from './item.js'
+export { ItemSchema, ItemPropertiesSchema, parseItem } from './item.js'
 export type { Item, ItemProperties } from './item.js'
 
 // Collection
@@ -10,9 +10,14 @@ export type { Collection, Extent, SpatialExtent, TemporalExtent } from './collec
 export { CatalogSchema, parseCatalog } from './catalog.js'
 export type { Catalog } from './catalog.js'
 
+// Error handling
+export { StacValidationError } from './errors.js'
+
 // Shared building blocks
-export { GeometrySchema, PointSchema, LineStringSchema, PolygonSchema, MultiPointSchema, MultiLineStringSchema, MultiPolygonSchema, GeometryCollectionSchema } from './geometry.js'
-export type { Geometry, Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon, GeometryCollection } from './geometry.js'
+export { GeometrySchema, PointSchema, LineStringSchema, PolygonSchema, MultiPointSchema, MultiLineStringSchema, MultiPolygonSchema, GeometryCollectionSchema, BboxSchema } from './geometry.js'
+export type { Geometry, Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon, GeometryCollection, Bbox } from './geometry.js'
+
+export { StacExtensionsSchema } from './shared.js'
 
 export { LinkSchema } from './link.js'
 export type { Link } from './link.js'

@@ -1,15 +1,10 @@
 import { z } from 'zod'
-import { BboxSchema } from './item.js'
+import { BboxSchema } from './geometry.js'
 import { LinkSchema } from './link.js'
 import { AssetSchema } from './asset.js'
 import { ProviderSchema } from './provider.js'
-
-const stacExtensionsSchema = z
-  .array(z.string())
-  .refine((arr) => new Set(arr).size === arr.length, {
-    message: 'stac_extensions must be unique',
-  })
-  .optional()
+import { StacExtensionsSchema } from './shared.js'
+import { StacValidationError } from './errors.js'
 
 // C3: outer bbox array requires at least one entry per STAC spec (minItems: 1).
 // Each inner bbox must be 4 (2D) or 6 (3D) numbers, same constraint as Item bbox.
@@ -36,7 +31,7 @@ export const ExtentSchema = z.object({
 export const CollectionSchema = z.object({
   type: z.literal('Collection'),
   stac_version: z.literal('1.0.0'),
-  stac_extensions: stacExtensionsSchema,
+  stac_extensions: StacExtensionsSchema,
   id: z.string().min(1),
   title: z.string().optional(),
   description: z.string().min(1),
@@ -58,5 +53,9 @@ export type Extent = z.infer<typeof ExtentSchema>
 export type Collection = z.infer<typeof CollectionSchema>
 
 export function parseCollection(data: unknown): Collection {
-  return CollectionSchema.parse(data)
+  const result = CollectionSchema.safeParse(data)
+  if (!result.success) {
+    throw new StacValidationError('Collection', result.error)
+  }
+  return result.data
 }
