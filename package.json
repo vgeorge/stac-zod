@@ -1,0 +1,38 @@
+{
+  "name": "stac-zod",
+  "version": "0.1.0",
+  "description": "Zod schemas for STAC 1.0.0 (SpatioTemporal Asset Catalog)",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "update-schemas": "tsx scripts/update-schemas.ts",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "zod": ">=3"
+  },
+  "devDependencies": {
+    "@apidevtools/json-schema-ref-parser": "^11",
+    "json-schema-to-zod": "^2",
+    "tsup": "^8",
+    "tsx": "^4",
+    "typescript": "^5",
+    "vitest": "^2",
+    "zod": "^3"
+  },
+  "keywords": ["stac", "zod", "schema", "validation", "geospatial"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vgeorge/stac-zod.git"
+  }
+}
