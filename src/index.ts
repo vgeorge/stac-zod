@@ -27,3 +27,7 @@ export type { Asset } from './asset.js'
 
 export { ProviderSchema, ProviderRoleSchema } from './provider.js'
 export type { Provider, ProviderRole } from './provider.js'
+
+// Extensions
+export { validateExtensions } from './extensions/index.js'
+export * as extensions from './extensions/index.js'

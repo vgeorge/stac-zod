@@ -7,7 +7,7 @@ import { StacValidationError } from './errors.js'
 
 export const ItemPropertiesSchema = z
   .object({
-    datetime: z.string().datetime({ offset: true }).nullable(),
+    datetime: z.string().datetime({ offset: true }).nullable().optional(),
     title: z.string().optional(),
     description: z.string().optional(),
     created: z.string().datetime({ offset: true }).optional(),
@@ -21,15 +21,15 @@ export const ItemPropertiesSchema = z
     gsd: z.number().positive().optional(),
   })
   .passthrough()
-  // C10: when datetime is null, both start_datetime and end_datetime are required.
+  // C10: when datetime is null or absent, both start_datetime and end_datetime are required.
   .superRefine((props, ctx) => {
     if (
-      props.datetime === null &&
+      (props.datetime === null || props.datetime === undefined) &&
       (props.start_datetime === undefined || props.end_datetime === undefined)
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'start_datetime and end_datetime are required when datetime is null',
+        message: 'start_datetime and end_datetime are required when datetime is null or absent',
         path: ['datetime'],
       })
     }

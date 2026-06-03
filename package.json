@@ -13,10 +13,18 @@
   "files": [
     "dist"
   ],
+  "bin": {
+    "stac-zod": "./dist/cli.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "build": "tsup",
     "test": "vitest run",
-    "prepublishOnly": "npm run build"
+    "validate": "node dist/cli.js validate",
+    "smoke-test": "node dist/cli.js validate https://dev.disasters.openveda.cloud/api/stac/",
+    "prepublishOnly": "pnpm build"
   },
   "peerDependencies": {
     "zod": ">=3"
@@ -39,9 +47,18 @@
     "validation",
     "geospatial"
   ],
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/vgeorge/stac-zod.git"
+  },
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "commander": "^15.0.0",
+    "ora": "^9.4.0",
+    "p-limit": "^7.3.0"
   }
 }

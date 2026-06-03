@@ -12,15 +12,13 @@ export const SpatialExtentSchema = z.object({
   bbox: z.array(BboxSchema).min(1),
 })
 
+const temporalBound = z
+  .string()
+  .datetime({ offset: true, message: 'must be ISO 8601 with UTC offset, e.g. "2024-01-01T00:00:00Z" or "2024-01-01T00:00:00+05:30"' })
+  .nullable()
+
 export const TemporalExtentSchema = z.object({
-  interval: z
-    .array(
-      z.tuple([
-        z.string().datetime({ offset: true }).nullable(),
-        z.string().datetime({ offset: true }).nullable(),
-      ]),
-    )
-    .min(1),
+  interval: z.array(z.tuple([temporalBound, temporalBound])).min(1),
 })
 
 export const ExtentSchema = z.object({
